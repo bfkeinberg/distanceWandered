@@ -14,11 +14,11 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
     }
 
 	function onTemporalEvent() {
-        Application.Storage.setValue("lastTimeRun", Time.now().value());
         Application.Storage.deleteValue("error");
         var positions = Application.Storage.getValue("positions");
         var key = Application.Properties.getValue("key");
         //my-wandrer.earth-key
+        //silent-chain-9650
         var isRide = Application.Properties.getValue("isRide");
         System.println("Is bike distance was " + isRide);
         var measureType = isRide ? "bike" : "walk";
@@ -30,7 +30,7 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
         // var url = "http://localhost:8080/wandrerDistance"; 
         // var url = "https://aqi-gateway.herokuapp.com/wandrerDistance";
         var url = Lang.format(
-            "https://wandrer.earth/api/v1/athletes/match?activity_type=$2$&key=$1$&source=ridewithgps",
+            "https://wandrer.earth/api/v1/athletes/match?activity_type=$2$&key=$1$&source=garmin",
             [key, measureType]);
         var params = {
               "points" => positions

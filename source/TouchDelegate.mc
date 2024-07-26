@@ -6,30 +6,20 @@ using Toybox.Application.Storage;
 using Toybox.Attention;
 
 class TouchDelegate extends WatchUi.BehaviorDelegate {
-    var lastTimeRun = null;
     var positions;
 
     // (:background)
     function initialize(Positions) {
         BehaviorDelegate.initialize();
         positions = Positions;
-        var lastTimeRun = Application.Storage.getValue("lastTimeRun");
-        if (lastTimeRun != null) {
-            var whenRun = new Time.Moment(lastTimeRun);
-            var howLongAgoRun = Time.now().subtract(whenRun);
-            if (new Time.Duration(300).compare(howLongAgoRun) < -300) {
-                System.println("Clearing out old last time run");
-                Application.Storage.deleteValue("lastTimeRun");
-            }
-        }
     }
 
     function onTap(clickEvent) {
         if (clickEvent.getType() == CLICK_TYPE_TAP) {
             var when = Time.now().subtract(Gregorian.duration({:minutes => 5}));
-            var lastTimeRun = Application.Storage.getValue("lastTimeRun");
+            var lastTimeRun = Background.getLastTemporalEventTime();
             if (lastTimeRun != null) {
-                when = new Time.Moment(lastTimeRun).add(new Time.Duration(300));
+                when = lastTimeRun.add(new Time.Duration(300));
             }
             var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
             System.println(
