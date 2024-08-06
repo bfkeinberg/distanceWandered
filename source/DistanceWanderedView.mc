@@ -5,20 +5,21 @@ import Toybox.WatchUi;
 import Toybox.Time;
 using Toybox.Position;
 using Toybox.System;
+using Toybox.Application.Storage;
+using Toybox.Attention;
 
 class DistanceWanderedView extends WatchUi.DataField {
 
     hidden var mValue as Numeric;
-    var positions;
+    // var positions;
     var lastAwake;
     const wakeInterval = 15; // TODO: configure
-    const minFreeSpace = 50000;   // TODO: guesswork
+    const minFreeSpace = 70000;   // TODO: guesswork
 
-    function initialize(Positions) {
+    function initialize() {
         DataField.initialize();
         lastAwake = Time.now();
         mValue = 0.0f;
-        positions = Positions;
         Application.Storage.setValue("connected", true);
     }
 
@@ -70,10 +71,15 @@ class DistanceWanderedView extends WatchUi.DataField {
                 // don't add default coords under simulator
                 var coords = currentPosition.toDegrees();
                 if (coords[0] <  179.999999d && coords[1] < 179.999999d) {
+                    var positions = Application.Storage.getValue("positions");
                     // System.println("Adding position " + currentPosition.toDegrees());
                     positions.add(coords);
+                    Application.Storage.setValue("positions", positions);
                     // System.println("The array size is now " + positions.size());
                 }
+            } else if (System.getSystemStats().freeMemory > minFreeSpace) {
+                // alert when there is insufficient free space to add points
+                Attention.playTone(Attention.TONE_INTERVAL_ALERT);
             }
         }
 

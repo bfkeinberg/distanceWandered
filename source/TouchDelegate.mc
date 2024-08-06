@@ -6,12 +6,10 @@ using Toybox.Application.Storage;
 using Toybox.Attention;
 
 class TouchDelegate extends WatchUi.BehaviorDelegate {
-    var positions;
 
     // (:background)
-    function initialize(Positions) {
+    function initialize() {
         BehaviorDelegate.initialize();
-        positions = Positions;
     }
 
     function onTap(clickEvent) {
@@ -26,6 +24,7 @@ class TouchDelegate extends WatchUi.BehaviorDelegate {
                 Lang.format("Tapped at $1$:$2$:$3$", 
                     [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
             var info = Gregorian.info(when, Time.FORMAT_MEDIUM);
+            var positions = Application.Storage.getValue("positions");
             System.println(
                 Lang.format("Will send request at $1$:$2$:$3$ with $4$ positions", 
                     [info.hour, info.min.format("%02d"), info.sec.format("%02d"), positions.size()]));
@@ -42,8 +41,6 @@ class TouchDelegate extends WatchUi.BehaviorDelegate {
                 Attention.playTone(Attention.TONE_FAILURE);
                 return true;
             }
-            System.println("Setting positions into storage");
-            Application.Storage.setValue("positions", positions);
             Application.Storage.setValue("pending", true);
             Background.registerForTemporalEvent(when);
         }

@@ -10,23 +10,13 @@ var milesWandered as Numeric = 0;
 class DistanceWanderedApp extends Application.AppBase {
 
     var inBackground = false;
-    var positions = [] as Array<Position.Location>;
 
     function initialize() {
         AppBase.initialize();
-        milesWandered = 0;
-        // Application.Storage.clearValues();
     }
 
     // onStart() is called on application start up
     function onStart(state as Dictionary?) as Void {
-        var here = Position.getInfo();
-        var currentPosition = here.position;
-        var accuracy = here.accuracy;
-        var inDegrees = currentPosition.toDegrees();
-        if (currentPosition != null && accuracy > Position.QUALITY_LAST_KNOWN && (inDegrees[0] < 179.999999d)) {
-            positions.add(currentPosition.toDegrees());
-        }
     }
 
     // onStop() is called when your application is exiting
@@ -47,9 +37,27 @@ class DistanceWanderedApp extends Application.AppBase {
         milesWandered = data_raw;
     }
 
+    function setFirstPosition() as Void {
+        var positions = [] as Array<Array<Lang.Double>>;
+        System.println("setting first position");
+        var here = Position.getInfo();
+        var currentPosition = here.position;
+        var accuracy = here.accuracy;
+        var inDegrees = currentPosition.toDegrees();
+        if (currentPosition != null && accuracy > Position.QUALITY_LAST_KNOWN && (inDegrees[0] < 179.999999d)) {
+            positions.add(currentPosition.toDegrees());
+        }
+        Application.Storage.setValue("positions", positions);
+    }
+
     // Return the initial view of your application here
     function getInitialView() as [Views] or [Views, InputDelegates] {
-        return [ new $.DistanceWanderedView(positions), new $.TouchDelegate(positions) ];
+        System.println("Getting initial view");
+        Application.Storage.deleteValue("positions");
+        setFirstPosition();
+        Application.Storage.deleteValue("pending");
+        milesWandered = 0;
+        return [ new $.DistanceWanderedView(), new $.TouchDelegate() ];
     }
 
     public function getSettingsView() as [Views] or [Views, InputDelegates] or Null {
