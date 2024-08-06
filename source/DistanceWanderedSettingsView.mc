@@ -64,13 +64,14 @@ class DataFieldSettingsDelegate extends WatchUi.BehaviorDelegate {
     //! Handle the menu event
     //! @return true if handled, false otherwise
     public function onMenu() as Boolean {
+        var keyText = Application.Properties.getValue("key");
         var menu = new $.DataFieldSettingsMenu();
         var displayCyclingDistance = Properties.getValue("isRide") ? true : false;
         menu.addItem(new WatchUi.ToggleMenuItem("Cycle or walk distance", null, "bike", displayCyclingDistance, null));
         menu.addItem(
             new MenuItem(
                 "Wandrer.earth key",
-                "from settings",
+                keyText,
                 "key",
                 {}
             )
