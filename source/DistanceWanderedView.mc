@@ -77,7 +77,7 @@ class DistanceWanderedView extends WatchUi.DataField {
                     Application.Storage.setValue("positions", positions);
                     // System.println("The array size is now " + positions.size());
                 }
-            } else if (System.getSystemStats().freeMemory > minFreeSpace) {
+            } else if (System.getSystemStats().freeMemory < minFreeSpace) {
                 // alert when there is insufficient free space to add points
                 Attention.playTone(Attention.TONE_INTERVAL_ALERT);
             }
