@@ -39,13 +39,13 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
             Lang.format("Sending request at $1$:$2$:$3$ with $4$ points and key $5$", 
                 [info.hour, info.min.format("%02d"), info.sec.format("%02d"), positions.size(), key]));
 
-        var url = Lang.format(
-            "http://localhost:8080/wandrerDistance?activity_type=$2$&key=$1$&source=garmin",
-            [key, measureType]);
-        // var url = "https://aqi-gateway.herokuapp.com/wandrerDistance";
         // var url = Lang.format(
-        //     "https://wandrer.earth/api/v1/athletes/match?activity_type=$2$&key=$1$&source=garmin",
+        //     "http://localhost:8080/wandrerDistance?activity_type=$2$&key=$1$&source=garmin",
         //     [key, measureType]);
+        // var url = "https://aqi-gateway.herokuapp.com/wandrerDistance";
+        var url = Lang.format(
+            "https://wandrer.earth/api/v1/athletes/match?activity_type=$2$&key=$1$&source=garmin",
+            [key, measureType]);
         var params = {
               "points" => positions
         };
