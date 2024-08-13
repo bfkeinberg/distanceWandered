@@ -6,6 +6,10 @@ using Toybox.Background;
 
 var milesWandered as Numeric = 0;
 
+typedef coords as Array<Lang.Double>;
+typedef positionChunk as Array<coords>;
+const maxChunkSize = 80;
+
 (:background)
 class DistanceWanderedApp extends Application.AppBase {
 
@@ -33,30 +37,17 @@ class DistanceWanderedApp extends Application.AppBase {
     }
 
     function onBackgroundData(data_raw as Application.PersistableType) {
-        System.println("Distance traveled was " + data_raw);
-        milesWandered = data_raw;
-    }
-
-    function setFirstPosition() as Void {
-        var positions = [] as Array<Array<Lang.Double>>;
-        System.println("setting first position");
-        var here = Position.getInfo();
-        var currentPosition = here.position;
-        var accuracy = here.accuracy;
-        var inDegrees = currentPosition.toDegrees();
-        if (currentPosition != null && accuracy > Position.QUALITY_LAST_KNOWN && (inDegrees[0] < 179.999999d)) {
-            positions.add(currentPosition.toDegrees());
+        if (data_raw == null) {
+            System.println("No background data, nothing to do");
         }
-        Application.Storage.setValue("positions", positions);
+        System.println("Additional distance traveled was " + data_raw);
+        milesWandered += data_raw;
     }
 
     // Return the initial view of your application here
     function getInitialView() as [Views] or [Views, InputDelegates] {
-        System.println("Getting initial view");
-        Application.Storage.deleteValue("positions");
-        setFirstPosition();
-        Application.Storage.deleteValue("pending");
         milesWandered = 0;
+        Background.deleteTemporalEvent();
         return [ new $.DistanceWanderedView(), new $.TouchDelegate() ];
     }
 

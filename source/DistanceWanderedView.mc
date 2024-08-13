@@ -7,19 +7,20 @@ using Toybox.Position;
 using Toybox.System;
 using Toybox.Application.Storage;
 using Toybox.Attention;
+using Toybox.Background;
 
 class DistanceWanderedView extends WatchUi.DataField {
 
-    hidden var mValue as Numeric;
-    // var positions;
     var lastAwake;
     const wakeInterval = 15; // TODO: configure
-    const minFreeSpace = 70000;   // TODO: guesswork
+    var dropping = false;
 
     function initialize() {
         DataField.initialize();
         lastAwake = Time.now();
-        mValue = 0.0f;
+        Application.Storage.clearValues();
+        setFirstPosition();
+        Application.Storage.setValue("bucketNum", 0);
         Application.Storage.setValue("connected", true);
     }
 
@@ -56,6 +57,77 @@ class DistanceWanderedView extends WatchUi.DataField {
         (View.findDrawableById("label") as Text).setText(Rez.Strings.label);
     }
 
+    function setFirstPosition() as Void {
+        var here = Position.getInfo();
+        var currentPosition = here.position;
+        var accuracy = here.accuracy;
+        var inDegrees = currentPosition.toDegrees();
+        var positions = [] as positionChunk;
+        if (currentPosition != null && accuracy > Position.QUALITY_LAST_KNOWN && (inDegrees[0] < 179.999999d)) {
+            positions.add(currentPosition.toDegrees());
+        }
+        Application.Storage.setValue("bucket_0", positions);
+    }
+
+    function addPosition(position as coords) {
+        var whichBucket = Application.Storage.getValue("bucketNum");
+        var positions = Application.Storage.getValue("bucket_" + whichBucket) as positionChunk;
+        // flip buckets?
+        if (positions.size() > maxChunkSize) {
+            positions = Application.Storage.getValue("bucket_" + whichBucket) ;
+            var lastTrigger = Background.getTemporalEventRegisteredTime();
+            var pendingEvent = (lastTrigger != null) && (Time.now().compare(lastTrigger) <= 0);
+            if (!pendingEvent) {
+                if (whichBucket == 1) {
+                    whichBucket = 0;
+                } else {
+                    whichBucket = 1;
+                }
+                var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+                System.println(
+                    Lang.format("Switching to bucket $4$ because size of bucket $6$ was $5$ points and triggering call to Wandrer at $1$:$2$:$3$", 
+                        [nowInfo.hour, nowInfo.min.format("%02d"), 
+                        nowInfo.sec.format("%02d"), 
+                        whichBucket, 
+                        positions.size(),
+                        Application.Storage.getValue("bucketNum")
+                        ]));
+                        // force clear
+                //Application.Storage.setValue("bucket_" + whichBucket, []);
+                positions = new positionChunk[0];
+                Application.Storage.setValue("bucketNum", whichBucket);
+                // ensure that we don't try to trigger background event until five minutes past the prior one
+                var when = Time.now();
+                var lastTimeRun = Background.getLastTemporalEventTime();
+                if (lastTimeRun != null) {
+                    when = lastTimeRun.add(new Time.Duration(300));
+                }
+                // System.println("registering for temporal event from addPosition");
+                Application.Storage.setValue("pending", true);
+                Background.registerForTemporalEvent(when);
+            } else {
+                var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+                var lastTriggerTime = Gregorian.info(lastTrigger, Time.FORMAT_MEDIUM);
+                if (!dropping) {
+                    System.println(
+                        Lang.format("Too many positions ($8$) in bucket $7$ to record at $1$:$2$:$3$, last time triggered was $4$:$5$:$6$", 
+                            [
+                                nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"),
+                                lastTriggerTime.hour, lastTriggerTime.min.format("%02d"), lastTriggerTime.sec.format("%02d"),
+                                whichBucket,
+                                Application.Storage.getValue("bucket_" + whichBucket).size()
+                            ]));
+                    Attention.playTone(Attention.TONE_ALERT_HI);
+                    dropping = true;
+                }
+                return;
+            }
+        }
+        dropping = false;
+        positions.add(position);
+        Application.Storage.setValue("bucket_" + whichBucket, positions);
+    }
+
     function compute(info as Activity.Info) as Void {
         var howLongAwake = Time.now().compare(lastAwake);
         if (howLongAwake >= wakeInterval) {
@@ -67,22 +139,16 @@ class DistanceWanderedView extends WatchUi.DataField {
             // System.println("waking up inside compute @ " + 
             //     currentPosition.toGeoString(Position.GEO_DEG) + " @ " + 
             //     Lang.format("$1$:$2$:$3$", [timeInfo.hour, timeInfo.min.format("%02d"), timeInfo.sec.format("%02d")]));
-            if (currentPosition != null && accuracy > Position.QUALITY_LAST_KNOWN && System.getSystemStats().freeMemory > minFreeSpace) {
+
+            if (currentPosition != null && accuracy > Position.QUALITY_LAST_KNOWN) {
                 // don't add default coords under simulator
                 var coords = currentPosition.toDegrees();
                 if (coords[0] <  179.999999d && coords[1] < 179.999999d) {
-                    var positions = Application.Storage.getValue("positions");
                     // System.println("Adding position " + currentPosition.toDegrees());
-                    positions.add(coords);
-                    Application.Storage.setValue("positions", positions);
-                    // System.println("The array size is now " + positions.size());
+                    addPosition(coords);
                 }
-            } else if (System.getSystemStats().freeMemory < minFreeSpace) {
-                // alert when there is insufficient free space to add points
-                Attention.playTone(Attention.TONE_INTERVAL_ALERT);
             }
         }
-
     }
 
     // Display the value you computed here. This will be called
@@ -99,13 +165,10 @@ class DistanceWanderedView extends WatchUi.DataField {
             label.setColor(Graphics.COLOR_WHITE);
         } else {
             value.setColor(Graphics.COLOR_BLACK);
+            label.setColor(Graphics.COLOR_BLACK);
         }
-        try {
-            if (Application.Storage.getValue("connected") == false) {
-                label.setColor(Graphics.COLOR_RED);
-            }
-        } catch (ex) {
-            System.println("Error while fetching connected value " + ex);
+        if (Application.Storage.getValue("connected") == false) {
+            label.setColor(Graphics.COLOR_RED);
         }
         value.setText(milesWandered.format("%.2f") + " miles");
         if (Application.Storage.getValue("pending")) {

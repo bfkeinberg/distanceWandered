@@ -24,25 +24,43 @@ class TouchDelegate extends WatchUi.BehaviorDelegate {
                 Lang.format("Tapped at $1$:$2$:$3$", 
                     [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
             var info = Gregorian.info(when, Time.FORMAT_MEDIUM);
-            var positions = Application.Storage.getValue("positions");
             System.println(
-                Lang.format("Will send request at $1$:$2$:$3$ with $4$ positions", 
-                    [info.hour, info.min.format("%02d"), info.sec.format("%02d"), positions.size()]));
+                Lang.format("Will send request at $1$:$2$:$3$", 
+                    [info.hour, info.min.format("%02d"), info.sec.format("%02d")]));
             var connectionInfo = System.getDeviceSettings().connectionInfo;
             var phoneIsConnected = connectionInfo.hasKey(:bluetooth) && connectionInfo.get(:bluetooth).state == System.CONNECTION_STATE_CONNECTED;
             Application.Storage.setValue("connected", phoneIsConnected);
             var connected = System.getDeviceSettings().phoneConnected;
             if (!connected || !phoneIsConnected) {
-                System.println("Phone not connected");
+                System.println("Phone not connected at " + info.hour + ":" + info.min.format("%02d"));
                 Attention.playTone(Attention.TONE_CANARY);
                 return true;
             }
-            if (positions.size() == 0) {
-                Attention.playTone(Attention.TONE_FAILURE);
-                return true;
+            // don't trigger background event if already scheduled
+            var lastTemporalEvent = Background.getTemporalEventRegisteredTime();
+            if (lastTemporalEvent == null || Time.now().compare(lastTemporalEvent) >= 0) {
+                var whichBucket = Application.Storage.getValue("bucketNum");
+                var positions = Application.Storage.getValue("bucket_" + whichBucket) as positionChunk;
+                if (positions.size() == 0) {
+                    System.println("No positions, returning from tap");
+                    Attention.playTone(Attention.TONE_ALERT_LO);
+                }
+                // flip the buckets, so that any positions stored while waiting for this event
+                // will be stored in the other bucket
+                // Since no event is scheduled the contents of the other bucket have already been used
+                Application.Storage.setValue("pending", true);
+                if (whichBucket == 1) {
+                    whichBucket = 0;
+                } else {
+                    whichBucket = 1;
+                }
+                Application.Storage.setValue("bucketNum", whichBucket);
+                // System.println("registering for temporal event");
+                Background.registerForTemporalEvent(when);
+            } else {
+                // notify user that nothing will happen
+                Attention.playTone(Attention.TONE_TIME_ALERT);
             }
-            Application.Storage.setValue("pending", true);
-            Background.registerForTemporalEvent(when);
         }
         return true;
     }
