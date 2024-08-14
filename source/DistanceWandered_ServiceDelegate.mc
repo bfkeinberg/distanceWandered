@@ -18,12 +18,26 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
     function getAllPositions() as positionChunk {
         whichBucket = Application.Storage.getValue("bucketNum");
         var chunk = whichBucket == 1 ? 0 : 1;
+        var dataForRetry = Application.Storage.getValue("retryData");
+        if (dataForRetry != null) {
+            var info = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+            System.println(
+                Lang.format(
+                    "Returning data for retry at $1$:$2$:$3$",
+                    [info.hour, info.min.format("%02d"), info.sec.format("%02d")]
+                )
+            );
+            // only going to retry it once for now
+            Application.Storage.deleteValue("retryData");
+            // we need to trigger again as soon as possible to flush out the existing data
+            Background.registerForTemporalEvent(Time.now().add(new Time.Duration(300)));
+            return dataForRetry;
+        }
         var allPositions = Application.Storage.getValue("bucket_" + chunk) as positionChunk;
-        // clear out the chunk data, it's tempting to keep it around for retrying, but that risks running out of memory or
-        // failed call to the phone app
-        // System.println("Clearing out bucket " + chunk);
+        // clear out the chunk data
         Application.Storage.setValue("bucket_" + chunk, []);
-    
+        // save this in case of error
+        Application.Storage.setValue("retryData", allPositions);
         return allPositions;
     }
 
@@ -79,14 +93,19 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
         Application.Storage.setValue("pending", false);
         if (responseCode == 200) {
             var distanceWandered = data.get("unique_length");
+            // now we can remove the bucket for possible retries
+            Application.Storage.deleteValue("retryData");
             Background.exit(distanceWandered);
         } else {
             System.println("Received error " + responseCode + " data:" + data);
             Application.Storage.setValue("error", responseCode);
-            // immediately retry if it wasn't connected to the phone
-            // if (responseCode == -104) {
-            //     Background.registerForTemporalEvent(Time.now());
-            // }
+            // retry as soon as possible if it wasn't connected to the phone
+            if (responseCode == -104 || responseCode == -2 || responseCode == -300) {
+                Background.registerForTemporalEvent(Time.now().add(new Time.Duration(300)));
+            } else {
+                // not deemed retryable so delete the save bucket
+                Application.Storage.deleteValue("retryData");
+            }
         }
         Background.exit(null);
     }
