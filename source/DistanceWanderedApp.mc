@@ -8,7 +8,7 @@ var milesWandered as Numeric = 0;
 
 typedef coords as Array<Lang.Double>;
 typedef positionChunk as Array<coords>;
-const maxChunkSize = 80;
+const maxChunkSize = 88;
 
 (:background)
 class DistanceWanderedApp extends Application.AppBase {
