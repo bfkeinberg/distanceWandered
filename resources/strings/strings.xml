@@ -4,4 +4,7 @@
     <string id="WanderKeyTitle">Wandrer.earth key</string>
     <string id="WanderKeyPrompt">Key provided in your Wandrer.earth account settings for use with browser plugin</string>
     <string id="RideOrWalk">Display cycling vs walking new miles</string>
+	<string id="WanderedMilesChartLabel">New Miles Wandered</string>
+	<string id="WanderedMilesLabel">New Miles</string>
+	<string id="WanderedUnitsLabel">miles</string>
 </strings>
