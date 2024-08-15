@@ -24,9 +24,6 @@ class TouchDelegate extends WatchUi.BehaviorDelegate {
                 Lang.format("Tapped at $1$:$2$:$3$", 
                     [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
             var info = Gregorian.info(when, Time.FORMAT_MEDIUM);
-            System.println(
-                Lang.format("Will send request at $1$:$2$:$3$", 
-                    [info.hour, info.min.format("%02d"), info.sec.format("%02d")]));
             var connectionInfo = System.getDeviceSettings().connectionInfo;
             var phoneIsConnected = connectionInfo.hasKey(:bluetooth) && connectionInfo.get(:bluetooth).state == System.CONNECTION_STATE_CONNECTED;
             Application.Storage.setValue("connected", phoneIsConnected);
@@ -41,10 +38,18 @@ class TouchDelegate extends WatchUi.BehaviorDelegate {
             if (lastTemporalEvent == null || Time.now().compare(lastTemporalEvent) >= 0) {
                 var whichBucket = Application.Storage.getValue("bucketNum");
                 var positions = Application.Storage.getValue("bucket_" + whichBucket) as positionChunk;
-                if (positions.size() == 0) {
+                if (positions.size() < 2) {
                     System.println("No positions, returning from tap");
                     Attention.playTone(Attention.TONE_ALERT_LO);
                 }
+                System.println(
+                    Lang.format("Scheduling request for $4$/$5$/$6$ $1$:$2$:$3$", 
+                        [
+                            info.hour, info.min.format("%02d"), info.sec.format("%02d"),
+                            info.month, info.day, info.year
+                        ]
+                    )
+                );
                 // flip the buckets, so that any positions stored while waiting for this event
                 // will be stored in the other bucket
                 // Since no event is scheduled the contents of the other bucket have already been used
