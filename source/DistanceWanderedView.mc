@@ -8,12 +8,14 @@ using Toybox.System;
 using Toybox.Application.Storage;
 using Toybox.Attention;
 using Toybox.Background;
+using Toybox.FitContributor;
 
 class DistanceWanderedView extends WatchUi.DataField {
 
     var lastAwake;
     const wakeInterval = 15; // TODO: configure
     var dropping = false;
+    const WANDERED_MILES_FIELD_ID = 0;
 
     function initialize() {
         DataField.initialize();
@@ -22,6 +24,8 @@ class DistanceWanderedView extends WatchUi.DataField {
         setFirstPosition();
         Application.Storage.setValue("bucketNum", 0);
         Application.Storage.setValue("connected", true);
+        newMilesField = createField("WanderedMiles", WANDERED_MILES_FIELD_ID, FitContributor.DATA_TYPE_FLOAT,
+            {:mesgType=>FitContributor.MESG_TYPE_RECORD, :units=>"miles"});
     }
 
     // Set your layout here. Anytime the size of obscurity of
@@ -72,11 +76,15 @@ class DistanceWanderedView extends WatchUi.DataField {
     function addPosition(position as coords) {
         var whichBucket = Application.Storage.getValue("bucketNum");
         var positions = Application.Storage.getValue("bucket_" + whichBucket) as positionChunk;
-        // flip buckets?
-        if (positions.size() > maxChunkSize) {
+        if (positions == null) {
+            // if we've tapped on the field before flipping buckets at least once
+            positions = new positionChunk[0];
+        }
+        else if (positions.size() > maxChunkSize) {
             positions = Application.Storage.getValue("bucket_" + whichBucket) ;
             var lastTrigger = Background.getTemporalEventRegisteredTime();
             var pendingEvent = (lastTrigger != null) && (Time.now().compare(lastTrigger) <= 0);
+            // flip buckets?
             if (!pendingEvent) {
                 if (whichBucket == 1) {
                     whichBucket = 0;
@@ -85,12 +93,16 @@ class DistanceWanderedView extends WatchUi.DataField {
                 }
                 var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
                 System.println(
-                    Lang.format("Switching to bucket $4$ because size of bucket $6$ was $5$ points and triggering call to Wandrer at $1$:$2$:$3$", 
-                        [nowInfo.hour, nowInfo.min.format("%02d"), 
+                    Lang.format("Switching to bucket $4$ because size of bucket $6$ was $5$ points and triggering call to Wandrer at $7$/$8$/$9$ $1$:$2$:$3$", 
+                        [nowInfo.hour, 
+                        nowInfo.min.format("%02d"), 
                         nowInfo.sec.format("%02d"), 
                         whichBucket, 
                         positions.size(),
-                        Application.Storage.getValue("bucketNum")
+                        Application.Storage.getValue("bucketNum"),
+                        nowInfo.month,
+                        nowInfo.day,
+                        nowInfo.year
                         ]));
                         // force clear
                 //Application.Storage.setValue("bucket_" + whichBucket, []);
@@ -110,7 +122,7 @@ class DistanceWanderedView extends WatchUi.DataField {
                 var lastTriggerTime = Gregorian.info(lastTrigger, Time.FORMAT_MEDIUM);
                 if (!dropping) {
                     System.println(
-                        Lang.format("Too many positions ($8$) in bucket $7$ to record at $1$:$2$:$3$, last time triggered was $4$:$5$:$6$", 
+                        Lang.format("Too many positions ($8$) in bucket $7$ to record at $1$:$2$:$3$, event trigger time is $4$:$5$:$6$", 
                             [
                                 nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"),
                                 lastTriggerTime.hour, lastTriggerTime.min.format("%02d"), lastTriggerTime.sec.format("%02d"),

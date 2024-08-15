@@ -5,6 +5,7 @@ import Toybox.Lang;
 using Toybox.Application;
 using Toybox.Application.Storage;
 using Toybox.Time.Gregorian;
+// using Toybox.Cryptography;
 
 (:background)
 class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
@@ -15,22 +16,29 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
         ServiceDelegate.initialize();
     }
 
-    function getAllPositions() as positionChunk {
+    function getChunk() {
         whichBucket = Application.Storage.getValue("bucketNum");
         var chunk = whichBucket == 1 ? 0 : 1;
+        return chunk;
+    }
+
+    function getAllPositions() as positionChunk {
+        var chunk = getChunk();
         var dataForRetry = Application.Storage.getValue("retryData");
         if (dataForRetry != null) {
             var info = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
             System.println(
                 Lang.format(
-                    "Returning data for retry at $1$:$2$:$3$",
-                    [info.hour, info.min.format("%02d"), info.sec.format("%02d")]
+                    "Returning data with count of $7$ for retry at $4$/$5$/$6$ $1$:$2$:$3$",
+                    [
+                        info.hour, info.min.format("%02d"), info.sec.format("%02d"),
+                        info.month, info.day, info.year,
+                        dataForRetry.size()
+                    ]
                 )
             );
             // only going to retry it once for now
             Application.Storage.deleteValue("retryData");
-            // we need to trigger again as soon as possible to flush out the existing data
-            Background.registerForTemporalEvent(Time.now().add(new Time.Duration(300)));
             return dataForRetry;
         }
         var allPositions = Application.Storage.getValue("bucket_" + chunk) as positionChunk;
@@ -47,8 +55,9 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
         //     [System.getSystemStats().freeMemory, System.getSystemStats().usedMemory, System.getSystemStats().totalMemory]));        
         var positions = getAllPositions();
         if (positions == null || positions.size() == 0) {
-            System.println("No positions stored, returning");
-            Attention.playTone(Attention.TONE_ALERT_LO);
+            var info = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+            System.println("No positions stored in bucket " + getChunk() + ", returning at " + info.hour.format("%02d") + ":" + info.min.format("%02d") + ":" + info.sec.format("%02d"));
+            Application.Storage.setValue("pending", false);
             Background.exit(null);
         }
         // System.println(
@@ -88,9 +97,20 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
        Communications.makeWebRequest(url, params, options, method(:onReceive));
 	}
 
+    // fail one out of three times
+    function shouldFail() as Boolean {
+        var rnd = Cryptography.randomBytes(1);
+        return (rnd[0] % 3 == 0);
+    }
+
    // set up the response callback function
     function onReceive(responseCode as Lang.Number, data as Null or Lang.Dictionary or Lang.String) as Void {
         Application.Storage.setValue("pending", false);
+        // var fail = shouldFail();
+        // if (fail) {
+        //     // to trigger retry
+        //     responseCode = -2;
+        // }
         if (responseCode == 200) {
             var distanceWandered = data.get("unique_length");
             // now we can remove the bucket for possible retries
@@ -100,10 +120,13 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
             System.println("Received error " + responseCode + " data:" + data);
             Application.Storage.setValue("error", responseCode);
             // retry as soon as possible if it wasn't connected to the phone
-            if (responseCode == -104 || responseCode == -2 || responseCode == -300) {
+            // but only if there is data available to retry
+            if ((responseCode == -104 || responseCode == -2 || responseCode == -300) && Application.Storage.getValue("retryData") != null) {
+                System.println("retrying error");
                 Background.registerForTemporalEvent(Time.now().add(new Time.Duration(300)));
             } else {
                 // not deemed retryable so delete the save bucket
+                System.println("not retrying error");
                 Application.Storage.deleteValue("retryData");
             }
         }
