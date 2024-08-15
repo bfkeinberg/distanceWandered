@@ -9,6 +9,7 @@ var milesWandered as Numeric = 0;
 typedef coords as Array<Lang.Double>;
 typedef positionChunk as Array<coords>;
 const maxChunkSize = 80;
+var newMilesField;
 
 (:background)
 class DistanceWanderedApp extends Application.AppBase {
@@ -39,9 +40,11 @@ class DistanceWanderedApp extends Application.AppBase {
     function onBackgroundData(data_raw as Application.PersistableType) {
         if (data_raw == null) {
             System.println("No background data, nothing to do");
+        } else {
+            System.println("Additional distance traveled was " + data_raw);
+            newMilesField.setData(data_raw);
+            milesWandered += data_raw;
         }
-        System.println("Additional distance traveled was " + data_raw);
-        milesWandered += data_raw;
     }
 
     // Return the initial view of your application here
