@@ -4,6 +4,7 @@ using Toybox.Background;
 using Toybox.Time.Gregorian;
 using Toybox.Application.Storage;
 using Toybox.Attention;
+import Toybox.Activity;
 
 class TouchDelegate extends WatchUi.BehaviorDelegate {
 
@@ -13,6 +14,11 @@ class TouchDelegate extends WatchUi.BehaviorDelegate {
     }
 
     function onTap(clickEvent) {
+        // don't do anything with the tap if no activity is running
+        var actInfo = Activity.getActivityInfo();
+        if (actInfo == null || actInfo.timerState == Activity.TIMER_STATE_OFF || actInfo.timerState == Activity.TIMER_STATE_STOPPED) {
+            return false;
+        }
         if (clickEvent.getType() == CLICK_TYPE_TAP) {
             var when = Time.now().subtract(Gregorian.duration({:minutes => 5}));
             var lastTimeRun = Background.getLastTemporalEventTime();
