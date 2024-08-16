@@ -141,6 +141,11 @@ class DistanceWanderedView extends WatchUi.DataField {
     }
 
     function compute(info as Activity.Info) as Void {
+        // don't count distance until an activity is started
+        var actInfo = Activity.getActivityInfo();
+        if (actInfo == null || actInfo.timerState == Activity.TIMER_STATE_OFF || actInfo.timerState == Activity.TIMER_STATE_STOPPED) {
+            return;
+        }
         var howLongAwake = Time.now().compare(lastAwake);
         if (howLongAwake >= wakeInterval) {
             lastAwake = Time.now();
