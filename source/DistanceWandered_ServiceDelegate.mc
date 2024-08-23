@@ -115,10 +115,19 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
             var distanceWandered = data.get("unique_length");
             // now we can remove the bucket for possible retries
             Application.Storage.deleteValue("retryData");
-            Background.exit(distanceWandered);
+            if (distanceWandered != null) {
+                Background.exit(distanceWandered);
+            }
+            if (data.get("error") != null) {
+                // display error from invalid Wandrer.earth user
+                Application.Storage.setValue("error", data.get("error"));
+                Background.exit(null);
+            }
         } else {
             System.println("Received error " + responseCode + " data:" + data);
             Application.Storage.setValue("error", responseCode);
+            System.println(Lang.format("Checking on retry with $1$ free memory and $2$ bytes used",
+                [System.getSystemStats().freeMemory, System.getSystemStats().usedMemory]));        
             // retry as soon as possible if it wasn't connected to the phone
             // but only if there is data available to retry
             if ((responseCode == -104 || responseCode == -2 || responseCode == -300) && Application.Storage.getValue("retryData") != null) {
@@ -132,4 +141,5 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
         }
         Background.exit(null);
     }
-}
+}        // System.println(Lang.format("In temporal event with $1$ free memory and $2$ bytes used, total $3$",
+        //     [System.getSystemStats().freeMemory, System.getSystemStats().usedMemory, System.getSystemStats().totalMemory]));        
