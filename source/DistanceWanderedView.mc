@@ -13,7 +13,7 @@ using Toybox.FitContributor;
 class DistanceWanderedView extends WatchUi.DataField {
 
     var lastAwake;
-    const wakeInterval = 15; // TODO: configure
+    const wakeInterval = 12; // TODO: configure
     var dropping = false;
     const WANDERED_MILES_FIELD_ID = 0;
 
@@ -183,6 +183,10 @@ class DistanceWanderedView extends WatchUi.DataField {
         } else {
             value.setColor(Graphics.COLOR_BLACK);
             label.setColor(Graphics.COLOR_BLACK);
+        }
+        // set background to pink if the default wandrer key has not been changed
+        if (Application.Properties.getValue("key").equals("my-wandrer.earth-key")) {
+            (View.findDrawableById("Background") as Text).setColor(Graphics.COLOR_PINK);
         }
         if (Application.Storage.getValue("connected") == false) {
             label.setColor(Graphics.COLOR_RED);
