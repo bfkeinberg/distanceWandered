@@ -3,6 +3,7 @@ import Toybox.Lang;
 import Toybox.WatchUi;
 using Toybox.Position;
 using Toybox.Background;
+using Toybox.Attention;
 
 var milesWandered as Numeric = 0;
 
@@ -15,6 +16,8 @@ var newMilesField;
 class DistanceWanderedApp extends Application.AppBase {
 
     var inBackground = false;
+    const distanceThreshold = 10;       // until we decide to make it configurable
+    var tonePlayedAt = 0;
 
     function initialize() {
         AppBase.initialize();
@@ -44,6 +47,11 @@ class DistanceWanderedApp extends Application.AppBase {
             System.println("Additional distance traveled was " + data_raw);
             newMilesField.setData(data_raw);
             milesWandered += data_raw;
+            // play a happy tune when we pass the threshold
+            if (milesWandered-tonePlayedAt > distanceThreshold) {
+                Attention.playTone(Attention.TONE_INTERVAL_ALERT);
+                tonePlayedAt = milesWandered;
+            }
         }
     }
 
