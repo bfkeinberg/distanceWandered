@@ -47,6 +47,7 @@ class TouchDelegate extends WatchUi.BehaviorDelegate {
                 if (positions.size() < 2) {
                     System.println("No positions, returning from tap");
                     Attention.playTone(Attention.TONE_ALERT_LO);
+                    return true;
                 }
                 System.println(
                     Lang.format("Scheduling request for $4$/$5$/$6$ $1$:$2$:$3$", 
