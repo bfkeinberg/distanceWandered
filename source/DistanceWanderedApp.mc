@@ -5,7 +5,7 @@ using Toybox.Position;
 using Toybox.Background;
 using Toybox.Attention;
 
-var milesWandered as Numeric = 0;
+var milesWandered as Numeric = -1;
 
 typedef coords as Array<Lang.Double>;
 typedef positionChunk as Array<coords>;
@@ -25,6 +25,14 @@ class DistanceWanderedApp extends Application.AppBase {
 
     // onStart() is called on application start up
     function onStart(state as Dictionary?) as Void {
+        if (state != null) {
+            System.println("State: " + state.toString());
+        }
+        if (System.getSystemStats().totalMemory < 32000) {
+        } else {
+            System.println("initializing miles wandered from onStart");
+            milesWandered = 0;
+        }
     }
 
     // onStop() is called when your application is exiting
@@ -57,8 +65,7 @@ class DistanceWanderedApp extends Application.AppBase {
 
     // Return the initial view of your application here
     function getInitialView() as [Views] or [Views, InputDelegates] {
-        milesWandered = 0;
-        Background.deleteTemporalEvent();
+        // Background.deleteTemporalEvent();
         return [ new $.DistanceWanderedView(), new $.TouchDelegate() ];
     }
 
