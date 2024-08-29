@@ -68,7 +68,7 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
         // System.println(Lang.format("After concatenating positions with $1$ free memory and $2$ bytes used, total $3$",
         //     [System.getSystemStats().freeMemory, System.getSystemStats().usedMemory, System.getSystemStats().totalMemory]));        
         var key = Application.Properties.getValue("key");
-        var isRide = Application.Properties.getValue("isRide");
+        var isRide = (Application.Properties.getValue("activityType") == 1);
         //my-wandrer.earth-key
         //silent-chain-9650
         // System.println("Is bike distance was " + isRide);
@@ -111,6 +111,8 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
         //     // to trigger retry
         //     responseCode = -2;
         // }
+        var info = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+
         if (responseCode == 200) {
             var distanceWandered = data.get("unique_length");
             // now we can remove the bucket for possible retries
@@ -124,13 +126,18 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
                 Background.exit(null);
             }
         } else {
-            System.println("Received error " + responseCode + " data:" + data);
+            System.println(
+                Lang.format("Received error $4$ at $1$:$2$:$3$", 
+                    [info.hour, info.min.format("%02d"), info.sec.format("%02d"), responseCode]));
             Application.Storage.setValue("error", responseCode);
-            System.println(Lang.format("Checking on retry with $1$ free memory and $2$ bytes used",
-                [System.getSystemStats().freeMemory, System.getSystemStats().usedMemory]));        
+            System.println(Lang.format("Checking on retry at $3$:$4$:$5$ with $1$ free memory and $2$ bytes used",
+                [System.getSystemStats().freeMemory, System.getSystemStats().usedMemory,
+                info.hour, info.min.format("%02d"), info.sec.format("%02d")]));
             // retry as soon as possible if it wasn't connected to the phone
             // but only if there is data available to retry
-            if ((responseCode == -104 || responseCode == -2 || responseCode == -300) && Application.Storage.getValue("retryData") != null) {
+            // and enough memory to check that there is data
+            var enoughMem = System.getSystemStats().freeMemory > 12000;
+            if ((responseCode == -104 || responseCode == -2 || responseCode == -300) && enoughMem && Application.Storage.getValue("retryData") != null) {
                 System.println("retrying error");
                 Background.registerForTemporalEvent(Time.now().add(new Time.Duration(300)));
             } else {
