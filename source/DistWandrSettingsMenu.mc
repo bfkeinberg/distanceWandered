@@ -21,30 +21,58 @@ class DataFieldSettingsMenu extends WatchUi.Menu2 {
 class DataFieldSettingsMenuDelegate extends WatchUi.Menu2InputDelegate {
 
     var keyText;
+    var parentMenu;
     //! Constructor
-    public function initialize() {
+    public function initialize(menu as Menu2) {
         Menu2InputDelegate.initialize();
         keyText = Application.Properties.getValue("key");
+        parentMenu = menu;
     }
 
     //! Handle a menu item selection
     //! @param menuItem The selected menu item
     public function onSelect(menuItem as MenuItem) as Void {
+        var toggleItem = menuItem as ToggleMenuItem;
         var id = menuItem.getId();
-        System.println("Menu item selected");
         if (id.equals("bike")) {
-            var theMenuItem = menuItem as ToggleMenuItem;
-            System.println("Setting bike vs walk");
-            Properties.setValue("isRide", theMenuItem.isEnabled());
+            var walkItemIndex = parentMenu.findItemById("walk");
+            var walkItem = parentMenu.getItem(walkItemIndex) as ToggleMenuItem;
+            if (toggleItem.isEnabled()) {
+                Properties.setValue("activityType", 1);
+                walkItem.setEnabled(false);
+            } else {
+                Properties.setValue("activityType", 2);
+                walkItem.setEnabled(true);
+            }
+        }
+        if (id.equals("walk")) {
+            var bikeItemIndex = parentMenu.findItemById("bike");
+            var bikeItem = parentMenu.getItem(bikeItemIndex) as ToggleMenuItem;
+            if (toggleItem.isEnabled()) {
+                Properties.setValue("activityType", 2);
+                bikeItem.setEnabled(false);
+            } else {
+                Properties.setValue("activityType", 1);
+                bikeItem.setEnabled(true);
+            }
+        }
+        if (id.equals("notifyDistance")) {
+            var notificationDistance = Application.Properties.getValue("notificationDistance");
+            WatchUi.pushView(
+                new $.NumberPicker(notificationDistance), 
+                new $.NumberPickerDelegate(), 
+                WatchUi.SLIDE_UP
+            );
         }
         if (id.equals("key")) {
             keyText = Application.Properties.getValue("key");
             System.println("Showing text entry with " + keyText);
             WatchUi.pushView(
                 new WatchUi.TextPicker(keyText),
-                new MyTextPickerDelegate(),
+                new MyTextPickerDelegate(menuItem),
                 WatchUi.SLIDE_DOWN
-            );            
+            );
         }
     }
 }
+

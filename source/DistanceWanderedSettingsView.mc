@@ -34,21 +34,24 @@ var lastText;
 
 class MyTextPickerDelegate extends WatchUi.TextPickerDelegate {
 
-    function initialize() {
+    var menuItem;
+
+    function initialize(parentMenuItem as MenuItem) {
         TextPickerDelegate.initialize();
+        menuItem = parentMenuItem;
     }
 
     function onTextEntered(text, changed) {
         if (changed) {
             System.println("Setting key to " + text);
             Application.Properties.setValue("key", text);
+            menuItem.setSubLabel(text);
         }
         lastText = text;
         return true;
     }
 
     function onCancel() {
-        System.println("Text entry canceled");
         return true;
     }
 }
@@ -67,8 +70,6 @@ class DataFieldSettingsDelegate extends WatchUi.BehaviorDelegate {
         var keyText = Application.Properties.getValue("key");
         System.println("Creating settings menu with key value " + keyText);
         var menu = new $.DataFieldSettingsMenu();
-        var displayCyclingDistance = Properties.getValue("isRide") ? true : false;
-        menu.addItem(new WatchUi.ToggleMenuItem("Cycle or walk distance", null, "bike", displayCyclingDistance, null));
         menu.addItem(
             new MenuItem(
                 "Wandrer.earth key",
@@ -77,8 +78,15 @@ class DataFieldSettingsDelegate extends WatchUi.BehaviorDelegate {
                 {}
             )
         );
+        menu.addItem(
+            new MenuItem("Notification distance", "Alert after this many miles", "notifyDistance", {}));
+        var currentType = Properties.getValue("activityType");
+        menu.addItem(
+            new ToggleMenuItem("Bicycling", "type of activity", "bike", currentType==1, {}));
+        menu.addItem(
+            new ToggleMenuItem("Walking", "type of activity", "walk", currentType==2, {}));
 
-        WatchUi.pushView(menu, new $.DataFieldSettingsMenuDelegate(), WatchUi.SLIDE_IMMEDIATE);
+        WatchUi.pushView(menu, new $.DataFieldSettingsMenuDelegate(menu), WatchUi.SLIDE_IMMEDIATE);
         return true;
     }
 }
