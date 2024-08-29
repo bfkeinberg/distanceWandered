@@ -5,6 +5,28 @@ using Toybox.Time.Gregorian;
 using Toybox.Application.Storage;
 using Toybox.Attention;
 import Toybox.Activity;
+import Toybox.Graphics;
+
+class DataFieldAlertView extends WatchUi.DataFieldAlert {
+
+    var message;
+
+    //! Constructor
+    public function initialize(_message) {
+        DataFieldAlert.initialize();
+        message = _message;
+    }
+
+    //! Update the view
+    //! @param dc Device context
+    public function onUpdate(dc as Dc) as Void {
+        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+        dc.clear();
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+
+        dc.drawText(dc.getWidth() / 2, dc.getHeight() / 2 - 30, Graphics.FONT_SMALL, message, Graphics.TEXT_JUSTIFY_CENTER);
+    }
+}
 
 class TouchDelegate extends WatchUi.BehaviorDelegate {
 
@@ -37,6 +59,16 @@ class TouchDelegate extends WatchUi.BehaviorDelegate {
             if (!connected || !phoneIsConnected) {
                 System.println("Phone not connected at " + info.hour + ":" + info.min.format("%02d"));
                 Attention.playTone(Attention.TONE_CANARY);
+                if (WatchUi.DataField has :showAlert) {
+                    WatchUi.DataField.showAlert(new $.DataFieldAlertView("Phone not connected"));
+                }
+                return true;
+            }
+            if (Application.Properties.getValue("key").equals("my-wandrer.earth-key")) {
+                Attention.playTone(Attention.TONE_CANARY);
+                if (WatchUi.DataField has :showAlert) {
+                    WatchUi.DataField.showAlert(new $.DataFieldAlertView("Key not configured"));
+                }
                 return true;
             }
             // don't trigger background event if already scheduled
