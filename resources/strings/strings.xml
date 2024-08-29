@@ -7,4 +7,9 @@
 	<string id="WanderedMilesChartLabel">New Miles Wandered</string>
 	<string id="WanderedMilesLabel">New Miles</string>
 	<string id="WanderedUnitsLabel">miles</string>
+	<string id="ActivityTypeTitle">Type of activity</string>
+	<string id="BikeType">Bicycle</string>
+	<string id="WalkType">Walk</string>
+	<string id="NotifyDistanceTitle">Notify after this many new miles</string>
+	<string id="NotificationPrompt">Set to zero to disable notifications</string>
 </strings>

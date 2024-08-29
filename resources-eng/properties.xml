@@ -1,15 +1,22 @@
 <resources>
     <properties>
         <property id="key" type="string">my-wandrer.earth-key</property>
-        <property id="isRide" type="boolean">true</property>
+        <property id="notificationDistance" type="number">10</property>
+        <property id="activityType" type="number">1</property>
     </properties>
 
     <settings>
         <setting propertyKey="@Properties.key" title="@Strings.WanderKeyTitle" prompt="@Strings.WanderKeyPrompt" helpUrl="https://www.wandrer.earth">
             <settingConfig required="true" type="alphaNumeric"/> 
         </setting>
-        <setting propertyKey="@Properties.isRide" title="@Strings.RideOrWalk">
-            <settingConfig type="boolean"/>
+        <setting propertyKey="@Properties.activityType" title="@Strings.ActivityTypeTitle">
+            <settingConfig type="list">
+				<listEntry value="1">@Strings.BikeType</listEntry>
+				<listEntry value="2">@Strings.WalkType</listEntry>                
+            </settingConfig>
+        </setting>
+        <setting propertyKey="@Properties.notificationDistance" title="@Strings.NotifyDistanceTitle" prompt="@Strings.NotificationPrompt">
+            <settingConfig type="numeric" min="0" max="40"/>
         </setting>
     </settings>
 
