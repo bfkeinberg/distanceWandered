@@ -15,17 +15,28 @@ class DistanceWanderedView extends WatchUi.DataField {
     var lastAwake;
     const wakeInterval = 12; // TODO: configure
     var dropping = false;
-    const WANDERED_MILES_FIELD_ID = 0;
+    const WANDERED_MILES_FIELD_ID = 77;
 
     function initialize() {
         DataField.initialize();
         lastAwake = Time.now();
-        Application.Storage.clearValues();
+        // var nowInfo = Gregorian.info(lastAwake, Time.FORMAT_MEDIUM);
+        // System.println(
+        //     Lang.format("creating fit field at $1$:$2$:$3$", 
+        //         [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
+        newMilesField = createField("WanderedMiles", WANDERED_MILES_FIELD_ID, FitContributor.DATA_TYPE_FLOAT,
+            {:mesgType=>FitContributor.MESG_TYPE_RECORD, :units=>"miles"});
         setFirstPosition();
         Application.Storage.setValue("bucketNum", 0);
         Application.Storage.setValue("connected", true);
-        newMilesField = createField("WanderedMiles", WANDERED_MILES_FIELD_ID, FitContributor.DATA_TYPE_FLOAT,
-            {:mesgType=>FitContributor.MESG_TYPE_RECORD, :units=>"miles"});
+    }
+
+    function onTimerReset() {
+        var nowInfo = Gregorian.info(lastAwake, Time.FORMAT_MEDIUM);
+        System.println(
+            Lang.format("Activity has ended at $1$:$2$:$3$", 
+                [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
+        Application.Storage.deleteValue("distance");
     }
 
     // Set your layout here. Anytime the size of obscurity of
