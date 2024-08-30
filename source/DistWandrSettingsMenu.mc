@@ -66,7 +66,6 @@ class DataFieldSettingsMenuDelegate extends WatchUi.Menu2InputDelegate {
         }
         if (id.equals("key")) {
             keyText = Application.Properties.getValue("key");
-            System.println("Showing text entry with " + keyText);
             WatchUi.pushView(
                 new WatchUi.TextPicker(keyText),
                 new MyTextPickerDelegate(menuItem),

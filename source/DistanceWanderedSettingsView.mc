@@ -68,7 +68,6 @@ class DataFieldSettingsDelegate extends WatchUi.BehaviorDelegate {
     //! @return true if handled, false otherwise
     public function onMenu() as Boolean {
         var keyText = Application.Properties.getValue("key");
-        System.println("Creating settings menu with key value " + keyText);
         var menu = new $.DataFieldSettingsMenu();
         menu.addItem(
             new MenuItem(

@@ -65,8 +65,6 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
         //         positions.size()
         //     ])
         // );
-        // System.println(Lang.format("After concatenating positions with $1$ free memory and $2$ bytes used, total $3$",
-        //     [System.getSystemStats().freeMemory, System.getSystemStats().usedMemory, System.getSystemStats().totalMemory]));        
         var key = Application.Properties.getValue("key");
         var isRide = (Application.Properties.getValue("activityType") == 1);
         //my-wandrer.earth-key

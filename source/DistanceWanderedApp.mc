@@ -48,6 +48,7 @@ class DistanceWanderedApp extends Application.AppBase {
                         [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
                 milesWandered = 0;
             }
+            System.println("clearing storage");
             Application.Storage.clearValues();
         }
     }
@@ -62,7 +63,7 @@ class DistanceWanderedApp extends Application.AppBase {
             // persist here as well, if an activity is running, but we may need to remove this if it persists into future runs
             var actInfo = Activity.getActivityInfo();
             if (actInfo != null && actInfo.timerState != Activity.TIMER_STATE_OFF) {
-                System.println("Activity running during onStop so preserving distance");
+                System.println("Activity running during onStop so preserving distance of " + milesWandered);
                 Application.Storage.setValue("distance", milesWandered);
             }
     		Background.deleteTemporalEvent();
