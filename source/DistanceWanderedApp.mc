@@ -92,7 +92,7 @@ class DistanceWanderedApp extends Application.AppBase {
             System.println(
                 Lang.format("Additional distance traveled was $4$ at $1$:$2$:$3$", 
                     [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"), data_raw]));
-            newMilesField.setData(data_raw);
+            newMilesField.setData(milesWandered);
             milesWandered += data_raw;
             Application.Storage.setValue("distance", milesWandered);
             // play a happy tune when we pass the threshold

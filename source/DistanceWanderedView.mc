@@ -34,8 +34,10 @@ class DistanceWanderedView extends WatchUi.DataField {
     function onTimerReset() {
         var nowInfo = Gregorian.info(lastAwake, Time.FORMAT_MEDIUM);
         System.println(
-            Lang.format("Activity has ended at $1$:$2$:$3$", 
-                [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
+            Lang.format("Activity has ended at $4$/$5$/$6$ $1$:$2$:$3$", 
+                [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"),
+                nowInfo.month, nowInfo.day, nowInfo.year
+                ]));
         Application.Storage.deleteValue("distance");
     }
 
@@ -133,12 +135,13 @@ class DistanceWanderedView extends WatchUi.DataField {
                 var lastTriggerTime = Gregorian.info(lastTrigger, Time.FORMAT_MEDIUM);
                 if (!dropping) {
                     System.println(
-                        Lang.format("Too many positions ($8$) in bucket $7$ to record at $1$:$2$:$3$, event trigger time is $4$:$5$:$6$", 
+                        Lang.format("Too many positions ($8$) in bucket $7$ to record at $9$/$10$/$11$ $1$:$2$:$3$, event trigger time is $4$:$5$:$6$", 
                             [
                                 nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"),
                                 lastTriggerTime.hour, lastTriggerTime.min.format("%02d"), lastTriggerTime.sec.format("%02d"),
                                 whichBucket,
-                                Application.Storage.getValue("bucket_" + whichBucket).size()
+                                Application.Storage.getValue("bucket_" + whichBucket).size(),
+                                nowInfo.month, nowInfo.day, nowInfo.year
                             ]));
                     Attention.playTone(Attention.TONE_ALERT_HI);
                     dropping = true;
@@ -206,8 +209,17 @@ class DistanceWanderedView extends WatchUi.DataField {
         if (Application.Storage.getValue("pending")) {
             value.setColor(Graphics.COLOR_LT_GRAY);
         }
-        if (Application.Storage.getValue("error")) {
-            value.setText("Error " + Application.Storage.getValue("error").toString());
+        var errorValue = Application.Storage.getValue("error");
+        if (errorValue) {
+            if (errorValue == -104) {
+                value.setText("Phone not connected");
+            } else if (errorValue == -300) {
+                value.setText("Weak cell signal");
+            } else if (errorValue instanceof String) {
+                value.setText(errorValue);
+            } else {
+                value.setText("Error " + errorValue.toString());
+            }
             value.setColor(Graphics.COLOR_RED);
         }
         // Call parent's onUpdate(dc) to redraw the layout

@@ -83,8 +83,9 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
               "points" => positions
         };
         System.println(
-            Lang.format("Sending request at $1$:$2$:$3$ with $4$ points and key $5$", 
-                [info.hour, info.min.format("%02d"), info.sec.format("%02d"), positions.size(), key]));
+            Lang.format("Sending request at $6$/$7$/$8$ $1$:$2$:$3$ with $4$ points and key $5$", 
+                [info.hour, info.min.format("%02d"), info.sec.format("%02d"), positions.size(), key,
+                info.month, info.day, info.year]));
         var options = {
             :method => Communications.HTTP_REQUEST_METHOD_POST,
             :headers => {                                           // set headers
@@ -125,8 +126,8 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
             }
         } else {
             System.println(
-                Lang.format("Received error $4$ at $1$:$2$:$3$", 
-                    [info.hour, info.min.format("%02d"), info.sec.format("%02d"), responseCode]));
+                Lang.format("Received error $4$ at $5$/$6$/$7$ $1$:$2$:$3$", 
+                    [info.hour, info.min.format("%02d"), info.sec.format("%02d"), responseCode, info.month, info.day, info.year]));
             Application.Storage.setValue("error", responseCode);
             System.println(Lang.format("Checking on retry at $3$:$4$:$5$ with $1$ free memory and $2$ bytes used",
                 [System.getSystemStats().freeMemory, System.getSystemStats().usedMemory,
