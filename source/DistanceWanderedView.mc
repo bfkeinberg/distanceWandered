@@ -16,6 +16,8 @@ class DistanceWanderedView extends WatchUi.DataField {
     const wakeInterval = 12; // TODO: configure
     var dropping = false;
     const WANDERED_MILES_FIELD_ID = 77;
+    const milesStr = WatchUi.loadResource(Rez.Strings.WanderedUnitsLabel) as String;
+    const kmStr = WatchUi.loadResource($.Rez.Strings.WanderedUnitsKmLabel) as String;
 
     function initialize() {
         DataField.initialize();
@@ -166,10 +168,6 @@ class DistanceWanderedView extends WatchUi.DataField {
             var here = Position.getInfo();
             var accuracy = here.accuracy;
             var currentPosition = here.position;
-            // var timeInfo = Gregorian.info(here.when, Time.FORMAT_MEDIUM);
-            // System.println("waking up inside compute @ " + 
-            //     currentPosition.toGeoString(Position.GEO_DEG) + " @ " + 
-            //     Lang.format("$1$:$2$:$3$", [timeInfo.hour, timeInfo.min.format("%02d"), timeInfo.sec.format("%02d")]));
 
             if (currentPosition != null && accuracy > Position.QUALITY_LAST_KNOWN) {
                 // don't add default coords under simulator
@@ -205,7 +203,11 @@ class DistanceWanderedView extends WatchUi.DataField {
         if (Application.Storage.getValue("connected") == false) {
             label.setColor(Graphics.COLOR_RED);
         }
-        value.setText(milesWandered.format("%.2f") + " miles");
+        var units = Application.Storage.getValue("units");
+        if (units == null) {
+            units = "mi";
+        }
+        value.setText(milesWandered.format("%.2f") + " " + (units.equals("mi") ?  milesStr : kmStr));
         if (Application.Storage.getValue("pending")) {
             value.setColor(Graphics.COLOR_LT_GRAY);
         }

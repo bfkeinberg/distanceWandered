@@ -105,15 +105,16 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
    // set up the response callback function
     function onReceive(responseCode as Lang.Number, data as Null or Lang.Dictionary or Lang.String) as Void {
         Application.Storage.setValue("pending", false);
-        // var fail = shouldFail();
+        // var fail = true; //shouldFail();
         // if (fail) {
         //     // to trigger retry
-        //     responseCode = -2;
+        //     responseCode = -300;
         // }
         var info = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
 
         if (responseCode == 200) {
             var distanceWandered = data.get("unique_length");
+            Application.Storage.setValue("units", data.get("unit"));
             // now we can remove the bucket for possible retries
             Application.Storage.deleteValue("retryData");
             if (distanceWandered != null) {
