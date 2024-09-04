@@ -97,10 +97,10 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
 	}
 
     // fail one out of three times
-    function shouldFail() as Boolean {
-        var rnd = Cryptography.randomBytes(1);
-        return (rnd[0] % 3 == 0);
-    }
+    // function shouldFail() as Boolean {
+    //     var rnd = Cryptography.randomBytes(1);
+    //     return (rnd[0] % 3 == 0);
+    // }
 
    // set up the response callback function
     function onReceive(responseCode as Lang.Number, data as Null or Lang.Dictionary or Lang.String) as Void {
@@ -114,17 +114,28 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
 
         if (responseCode == 200) {
             var distanceWandered = data.get("unique_length");
-            Application.Storage.setValue("units", data.get("unit"));
+            if (!data.get("unit").equals("")) {
+                Application.Storage.setValue("units", data.get("unit"));
+            } else {
+                System.println(
+                    Lang.format("No units returned at $4$/$5$/$6$ $1$:$2$:$3$", 
+                        [info.hour, info.min.format("%02d"), info.sec.format("%02d"), info.month, info.day, info.year]));
+            }
             // now we can remove the bucket for possible retries
             Application.Storage.deleteValue("retryData");
-            if (distanceWandered != null) {
+            if (distanceWandered != null && distanceWandered != "--") {
                 Background.exit(distanceWandered);
+            }
+            if (distanceWandered != "--") {
+                System.println(
+                    Lang.format("Distance wandered was -- at $4$/$5$/$6$ $1$:$2$:$3$", 
+                        [info.hour, info.min.format("%02d"), info.sec.format("%02d"), info.month, info.day, info.year]));
             }
             if (data.get("error") != null) {
                 // display error from invalid Wandrer.earth user
                 Application.Storage.setValue("error", data.get("error"));
-                Background.exit(null);
             }
+            Background.exit(null);
         } else {
             System.println(
                 Lang.format("Received error $4$ at $5$/$6$/$7$ $1$:$2$:$3$", 
