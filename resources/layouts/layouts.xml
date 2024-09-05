@@ -3,7 +3,14 @@
     <layout id="MainLayout">
         <drawable class="Background" />
         <label id="label" x="center" y="center" color="Graphics.COLOR_BLACK" justification="Graphics.TEXT_JUSTIFY_CENTER" font="Graphics.FONT_TINY" />
-        <label id="value" x="center" y="center" color="Graphics.COLOR_WHITE" justification="Graphics.TEXT_JUSTIFY_CENTER" font="Graphics.FONT_LARGE" />
+        <text-area id="value" width="fill" height="30%" x="center" y="45%" color="Graphics.COLOR_WHITE" justification="Graphics.TEXT_JUSTIFY_CENTER">
+            <fonts>
+                <font>Graphics.FONT_LARGE</font>
+                <font>Graphics.FONT_MEDIUM</font>
+                <font>Graphics.FONT_SMALL</font>
+                <font>Graphics.FONT_TINY</font>
+            </fonts>
+        </text-area>
     </layout>
 
     <!-- Layouts used for the for the four quadrants. -->
