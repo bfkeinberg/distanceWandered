@@ -95,10 +95,12 @@ class DistanceWanderedApp extends Application.AppBase {
             newMilesField.setData(milesWandered);
             milesWandered += data_raw;
             Application.Storage.setValue("distance", milesWandered);
-            // play a happy tune when we pass the threshold
-            if (milesWandered-tonePlayedAt > Application.Properties.getValue("notificationDistance")) {
-                Attention.playTone(Attention.TONE_SUCCESS);
-                tonePlayedAt = milesWandered;
+            // play a happy tune when we pass the threshold, zero disables the feature
+            if (Application.Properties.getValue("notificationDistance") != 0) {
+                if (milesWandered-tonePlayedAt > Application.Properties.getValue("notificationDistance")) {
+                    Attention.playTone(Attention.TONE_SUCCESS);
+                    tonePlayedAt = milesWandered;
+                }
             }
         }
     }
