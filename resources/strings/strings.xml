@@ -1,6 +1,7 @@
 <strings>
     <string id="AppName">DistanceWandered</string>
     <string id="label">Dist Wandered</string>
+	<string id="longerLabel">Distance Wandered</string>
     <string id="WanderKeyTitle">Wandrer.earth key</string>
     <string id="WanderKeyPrompt">Key provided in your Wandrer.earth account settings for use with browser plugin</string>
     <string id="RideOrWalk">Display cycling vs walking new miles</string>

@@ -39,16 +39,19 @@ class DistanceWanderedApp extends Application.AppBase {
             var previousDistance = Application.Storage.getValue("distance");
             if (previousDistance != null) {
                 System.println(
-                    Lang.format("Reusing previous accumulated distance $4$ at $1$:$2$:$3$", 
-                        [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"), previousDistance]));
+                    Lang.format("onStart in foreground is Reusing previous accumulated distance $4$ at $5$/$6$/$7$ $1$:$2$:$3$", 
+                        [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"), 
+                        previousDistance, nowInfo.month, nowInfo.day, nowInfo.year]));
                 milesWandered = previousDistance;
             } else {
                 System.println(
-                    Lang.format("initializing miles wandered from onStart at $1$:$2$:$3$", 
-                        [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
+                    Lang.format("initializing miles wandered from onStart at $4$/$5$/$6$ $1$:$2$:$3$", 
+                        [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"),
+                         nowInfo.month, nowInfo.day, nowInfo.year
+                        ]));
                 milesWandered = 0;
             }
-            System.println("clearing storage");
+            System.println("clearing storage from onStart");
             Application.Storage.clearValues();
         }
     }

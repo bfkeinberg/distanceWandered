@@ -22,10 +22,6 @@ class DistanceWanderedView extends WatchUi.DataField {
     function initialize() {
         DataField.initialize();
         lastAwake = Time.now();
-        // var nowInfo = Gregorian.info(lastAwake, Time.FORMAT_MEDIUM);
-        // System.println(
-        //     Lang.format("creating fit field at $1$:$2$:$3$", 
-        //         [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
         newMilesField = createField("WanderedMiles", WANDERED_MILES_FIELD_ID, FitContributor.DATA_TYPE_FLOAT,
             {:mesgType=>FitContributor.MESG_TYPE_RECORD, :units=>"miles"});
         setFirstPosition();
@@ -41,12 +37,42 @@ class DistanceWanderedView extends WatchUi.DataField {
                 nowInfo.month, nowInfo.day, nowInfo.year
                 ]));
         Application.Storage.deleteValue("distance");
+        Application.Storage.deleteValue("bucket_0");
+        Application.Storage.deleteValue("bucket_1");
+        Application.Storage.deleteValue("retryData");
+        Application.Storage.clearValues();
+    }
+
+    function onTimerStart() {
+        var nowInfo = Gregorian.info(lastAwake, Time.FORMAT_MEDIUM);
+        System.println(
+            Lang.format("Activity has started at $4$/$5$/$6$ $1$:$2$:$3$", 
+                [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"),
+                nowInfo.month, nowInfo.day, nowInfo.year
+                ]));
+        var activityInfo = Activity.getActivityInfo();
+        if (activityInfo != null && activityInfo.elapsedDistance != null) {
+            if (activityInfo.elapsedDistance == 0) {
+                System.println("Zeroing out distance");
+                $.milesWandered = 0;
+                Application.Storage.setValue("distance", 0);
+            }
+        } else {
+            System.println(
+                Lang.format("No activity info or distance in onTimerStart at $4$/$5$/$6$ $1$:$2$:$3$",
+                    [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"),
+                    nowInfo.month, nowInfo.day, nowInfo.year])
+            );
+        }
     }
 
     // Set your layout here. Anytime the size of obscurity of
     // the draw context is changed this will be called.
     function onLayout(dc as Dc) as Void {
         var obscurityFlags = DataField.getObscurityFlags();
+        var width = dc.getWidth();
+        var screenWidth = System.getDeviceSettings().screenWidth;
+        var halfWidth = (screenWidth / width) >= 2;
 
         // Top left quadrant so we'll use the top left layout
         if (obscurityFlags == (OBSCURE_TOP | OBSCURE_LEFT)) {
@@ -67,13 +93,13 @@ class DistanceWanderedView extends WatchUi.DataField {
         // Use the generic, centered layout
         } else {
             View.setLayout(Rez.Layouts.MainLayout(dc));
-            var labelView = View.findDrawableById("label") as Text;
-            labelView.locY = labelView.locY - 16;
-            var valueView = View.findDrawableById("value") as Text;
-            valueView.locY = valueView.locY + 7;
+            var labelView = View.findDrawableById("label") as TextArea;
+            labelView.locY = labelView.locY - 10;
+            var valueView = View.findDrawableById("value") as TextArea;
+            valueView.locY = valueView.locY + 11;
         }
 
-        (View.findDrawableById("label") as Text).setText(Rez.Strings.label);
+        (View.findDrawableById("label") as TextArea).setText(halfWidth ? Rez.Strings.label : Rez.Strings.longerLabel);
     }
 
     function setFirstPosition() as Void {
@@ -187,8 +213,8 @@ class DistanceWanderedView extends WatchUi.DataField {
         (View.findDrawableById("Background") as Text).setColor(getBackgroundColor());
 
         // Set the foreground color and value
-        var value = View.findDrawableById("value") as Text;
-        var label = View.findDrawableById("label") as Text;
+        var value = View.findDrawableById("value") as TextArea;
+        var label = View.findDrawableById("label") as TextArea;
         if (getBackgroundColor() == Graphics.COLOR_BLACK) {
             value.setColor(Graphics.COLOR_WHITE);
             label.setColor(Graphics.COLOR_WHITE);
