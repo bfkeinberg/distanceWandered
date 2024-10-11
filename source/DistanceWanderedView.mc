@@ -206,6 +206,16 @@ class DistanceWanderedView extends WatchUi.DataField {
         }
     }
 
+    function runInLastFiveMinutes() as Boolean {
+        var lastTimeRun = Background.getLastTemporalEventTime();
+        if (lastTimeRun == null) {
+            return false;
+        }
+        var when = Time.now();
+        var ago = when.compare(lastTimeRun);
+        return (ago < 300) ;
+    }
+
     // Display the value you computed here. This will be called
     // once a second when the data field is visible.
     function onUpdate(dc as Dc) as Void {
@@ -252,6 +262,10 @@ class DistanceWanderedView extends WatchUi.DataField {
         }
         // Call parent's onUpdate(dc) to redraw the layout
         View.onUpdate(dc);
+        if (!runInLastFiveMinutes()) {
+            var greenDot = new Rez.Drawables.DotHolder();
+            greenDot.draw( dc ); 
+        }
     }
 
 }
