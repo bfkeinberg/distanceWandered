@@ -37,7 +37,7 @@ class DistanceWanderedApp extends Application.AppBase {
                     [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
         } else {
             var previousDistance = Application.Storage.getValue("distance");
-            if (previousDistance != null) {
+            if (previousDistance != null && previousDistance instanceof Lang.Number) {
                 System.println(
                     Lang.format("onStart in foreground is Reusing previous accumulated distance $4$ at $5$/$6$/$7$ $1$:$2$:$3$", 
                         [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"), 
@@ -89,14 +89,14 @@ class DistanceWanderedApp extends Application.AppBase {
 
     function onBackgroundData(data_raw as Application.PersistableType) {
         var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
-        if (data_raw == null) {
+        if (data_raw == null or data_raw instanceof Lang.String) {
             System.println("No background data, nothing to do");
         } else {
             System.println(
                 Lang.format("Additional distance traveled was $4$ at $1$:$2$:$3$", 
                     [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"), data_raw]));
-            newMilesField.setData(milesWandered);
             milesWandered += data_raw;
+            newMilesField.setData(milesWandered);
             Application.Storage.setValue("distance", milesWandered);
             // play a happy tune when we pass the threshold, zero disables the feature
             if (Application.Properties.getValue("notificationDistance") != 0) {

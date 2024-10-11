@@ -113,8 +113,9 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
         var info = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
 
         if (responseCode == 200) {
+            System.println(data);
             var distanceWandered = data.get("unique_length");
-            if (!data.get("unit").equals("")) {
+            if (data.get("unit") != null && !data.get("unit").equals("")) {
                 Application.Storage.setValue("units", data.get("unit"));
             } else {
                 System.println(
@@ -124,9 +125,10 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
             // now we can remove the bucket for possible retries
             Application.Storage.deleteValue("retryData");
             if (distanceWandered != null && distanceWandered != "--") {
+                System.println("Exiting normally because distance wandered was " + distanceWandered);
                 Background.exit(distanceWandered);
             }
-            if (distanceWandered != "--") {
+            if (distanceWandered == "--") {
                 System.println(
                     Lang.format("Distance wandered was -- at $4$/$5$/$6$ $1$:$2$:$3$", 
                         [info.hour, info.min.format("%02d"), info.sec.format("%02d"), info.month, info.day, info.year]));
@@ -135,6 +137,7 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
                 // display error from invalid Wandrer.earth user
                 Application.Storage.setValue("error", data.get("error"));
             }
+            System.println("About to exit onReceive with null");
             Background.exit(null);
         } else {
             System.println(
