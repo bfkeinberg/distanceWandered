@@ -1,6 +1,6 @@
 <drawables>
     <bitmap id="LauncherIcon" filename="launcher_icon.png" />
     <drawable-list id="DotHolder" background="Gfx.COLOR_TRANSPARENT">
-        <shape type="circle" x="right" y="50" radius="5" color="Gfx.COLOR_GREEN"/>
+        <shape type="circle" x="right" y="50" radius="8" color="Gfx.COLOR_GREEN"/>
     </drawable-list>
 </drawables>

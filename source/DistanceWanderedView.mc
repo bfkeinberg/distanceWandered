@@ -264,6 +264,7 @@ class DistanceWanderedView extends WatchUi.DataField {
         View.onUpdate(dc);
         if (!runInLastFiveMinutes()) {
             var greenDot = new Rez.Drawables.DotHolder();
+            greenDot.locX = dc.getWidth() - 13;
             greenDot.draw( dc ); 
         }
     }
