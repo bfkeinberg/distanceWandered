@@ -22,7 +22,7 @@ class DistanceWanderedView extends WatchUi.DataField {
     function initialize() {
         DataField.initialize();
         lastAwake = Time.now();
-        newMilesField = createField("WanderedMiles", WANDERED_MILES_FIELD_ID, FitContributor.DATA_TYPE_FLOAT,
+        $.newMilesField = createField("WanderedMiles", WANDERED_MILES_FIELD_ID, FitContributor.DATA_TYPE_FLOAT,
             {:mesgType=>FitContributor.MESG_TYPE_RECORD, :units=>"miles"});
         setFirstPosition();
         Application.Storage.setValue("bucketNum", 0);
@@ -51,17 +51,17 @@ class DistanceWanderedView extends WatchUi.DataField {
                 nowInfo.month, nowInfo.day, nowInfo.year
                 ]));
         var activityInfo = Activity.getActivityInfo();
-        if (activityInfo != null && activityInfo.elapsedDistance != null) {
-            if (activityInfo.elapsedDistance == 0) {
+        if (activityInfo != null) {
+            if (activityInfo.elapsedDistance == 0 || activityInfo.elapsedDistance == null) {
                 System.println("Zeroing out distance");
                 $.milesWandered = 0;
                 Application.Storage.setValue("distance", 0);
             }
         } else {
             System.println(
-                Lang.format("No activity info or distance in onTimerStart at $4$/$5$/$6$ $1$:$2$:$3$",
+                Lang.format("No activity info in onTimerStart at $4$/$5$/$6$ $1$:$2$:$3$ : $7$",
                     [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"),
-                    nowInfo.month, nowInfo.day, nowInfo.year])
+                    nowInfo.month, nowInfo.day, nowInfo.year, activityInfo == null])
             );
         }
     }
