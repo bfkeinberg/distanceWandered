@@ -112,8 +112,8 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
         // }
         var info = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
 
+        System.println(data);
         if (responseCode == 200) {
-            System.println(data);
             var distanceWandered = data.get("unique_length");
             if (data.get("unit") != null && !data.get("unit").equals("")) {
                 Application.Storage.setValue("units", data.get("unit"));
