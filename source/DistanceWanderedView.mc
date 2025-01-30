@@ -53,7 +53,6 @@ class DistanceWanderedView extends WatchUi.DataField {
         var activityInfo = Activity.getActivityInfo();
         if (activityInfo != null) {
             if (activityInfo.elapsedDistance == 0 || activityInfo.elapsedDistance == null) {
-                System.println("Zeroing out distance");
                 $.milesWandered = 0;
                 Application.Storage.setValue("distance", 0);
             }

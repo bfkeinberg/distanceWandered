@@ -112,7 +112,6 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
         // }
         var info = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
 
-        System.println(data);
         if (responseCode == 200) {
             var distanceWandered = data.get("unique_length");
             if (data.get("unit") != null && !data.get("unit").equals("")) {
@@ -125,7 +124,7 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
             // now we can remove the bucket for possible retries
             Application.Storage.deleteValue("retryData");
             if (distanceWandered != null && distanceWandered != "--") {
-                System.println("Exiting normally because distance wandered was " + distanceWandered);
+                System.println("onReceive exiting normally because distance wandered was " + distanceWandered);
                 Background.exit(distanceWandered);
             }
             if (distanceWandered == "--") {
@@ -139,6 +138,9 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
             }
             System.println("About to exit onReceive with null");
             Background.exit(null);
+        } else if (responseCode == -400) {
+            System.println("Returning zero distance after -400 return code");
+            Background.exit(0);
         } else {
             System.println(
                 Lang.format("Received error $4$ at $5$/$6$/$7$ $1$:$2$:$3$", 
