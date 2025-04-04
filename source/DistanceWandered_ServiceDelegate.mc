@@ -123,7 +123,7 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
             }
             // now we can remove the bucket for possible retries
             Application.Storage.deleteValue("retryData");
-            if (distanceWandered != null && distanceWandered != "--") {
+            if (distanceWandered != null && distanceWandered != "--" && distanceWandered instanceof Lang.Number) {
                 System.println("onReceive exiting normally because distance wandered was " + distanceWandered);
                 Background.exit(distanceWandered);
             }

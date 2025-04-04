@@ -88,7 +88,7 @@ class DistanceWanderedApp extends Application.AppBase {
 
     function onBackgroundData(data_raw as Application.PersistableType) {
         var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
-        if (data_raw == null or data_raw instanceof Lang.String) {
+        if (data_raw == null or !(data_raw instanceof Lang.Number)) {
             System.println("No background data, nothing to do");
         } else {
             System.println(

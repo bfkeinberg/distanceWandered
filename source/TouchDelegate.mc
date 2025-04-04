@@ -76,7 +76,7 @@ class TouchDelegate extends WatchUi.BehaviorDelegate {
             if (lastTemporalEvent == null || Time.now().compare(lastTemporalEvent) >= 0) {
                 var whichBucket = Application.Storage.getValue("bucketNum");
                 var positions = Application.Storage.getValue("bucket_" + whichBucket) as positionChunk;
-                if (positions.size() < 2) {
+                if (positions == null || !(positions instanceof Lang.Array) || positions.size() < 2) {
                     System.println("No positions, returning from tap");
                     Attention.playTone(Attention.TONE_ALERT_LO);
                     return true;
