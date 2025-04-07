@@ -37,20 +37,33 @@ class DistanceWanderedApp extends Application.AppBase {
                     [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
         } else {
             var previousDistance = Application.Storage.getValue("distance");
-            if (previousDistance != null && previousDistance instanceof Lang.Number) {
+            if (previousDistance != null) {
+                if (previousDistance instanceof Lang.Float || previousDistance instanceof Lang.Number) {
+                    System.println(
+                        Lang.format("onStart in foreground is reusing previous accumulated distance $4$ at $5$/$6$/$7$ $1$:$2$:$3$", 
+                            [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"), 
+                            previousDistance, nowInfo.month, nowInfo.day, nowInfo.year]));
+                    milesWandered = previousDistance;
+                }
+                else {
+                    System.println(
+                        Lang.format("Invalid previous distance $7$, initializing miles wandered from onStart at $4$/$5$/$6$ $1$:$2$:$3$", 
+                            [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"),
+                            nowInfo.month, nowInfo.day, nowInfo.year,
+                            previousDistance
+                            ]));
+                    milesWandered = 0;
+                }
+            }
+            else {
                 System.println(
-                    Lang.format("onStart in foreground is reusing previous accumulated distance $4$ at $5$/$6$/$7$ $1$:$2$:$3$", 
-                        [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"), 
-                        previousDistance, nowInfo.month, nowInfo.day, nowInfo.year]));
-                milesWandered = previousDistance;
-            } else {
-                System.println(
-                    Lang.format("initializing miles wandered from onStart at $4$/$5$/$6$ $1$:$2$:$3$", 
+                    Lang.format("No previous distance, initializing miles wandered from onStart at $4$/$5$/$6$ $1$:$2$:$3$",
                         [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"),
-                         nowInfo.month, nowInfo.day, nowInfo.year
+                        nowInfo.month, nowInfo.day, nowInfo.year
                         ]));
                 milesWandered = 0;
             }
+
             Application.Storage.clearValues();
         }
     }
@@ -88,8 +101,21 @@ class DistanceWanderedApp extends Application.AppBase {
 
     function onBackgroundData(data_raw as Application.PersistableType) {
         var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
-        if (data_raw == null or !(data_raw instanceof Lang.Number)) {
-            System.println("No background data, nothing to do");
+        if (!(data_raw instanceof Lang.Float)) {
+            var warningMsg = Lang.format("Invalid distance $1$ returned", [data_raw]);
+            var fullWarningMsg = Lang.format(
+                "$7$ at $4$/$5$/$6$ $1$:$2$:$3$", 
+                    [nowInfo.hour, nowInfo.min.format("%02d"), 
+                    nowInfo.sec.format("%02d"), nowInfo.month, nowInfo.day, nowInfo.year,
+                    warningMsg]);
+            System.println(fullWarningMsg);
+            if (WatchUi.DataField has :showAlert) {
+                try {
+                    WatchUi.DataField.showAlert(new $.DataFieldAlertView(warningMsg));
+                } catch (excpt) {
+                    System.println("Exception when showing warning");
+                }
+            }
         } else {
             System.println(
                 Lang.format("Additional distance traveled was $4$ at $1$:$2$:$3$", 

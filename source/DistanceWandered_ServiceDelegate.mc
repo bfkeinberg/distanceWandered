@@ -123,21 +123,11 @@ class DistanceWandered_ServiceDelgate extends Toybox.System.ServiceDelegate {
             }
             // now we can remove the bucket for possible retries
             Application.Storage.deleteValue("retryData");
-            if (distanceWandered != null && distanceWandered != "--" && distanceWandered instanceof Lang.Number) {
-                System.println("onReceive exiting normally because distance wandered was " + distanceWandered);
-                Background.exit(distanceWandered);
-            }
-            if (distanceWandered == "--") {
-                System.println(
-                    Lang.format("Distance wandered was -- at $4$/$5$/$6$ $1$:$2$:$3$", 
-                        [info.hour, info.min.format("%02d"), info.sec.format("%02d"), info.month, info.day, info.year]));
-            }
             if (data.get("error") != null) {
                 // display error from invalid Wandrer.earth user
                 Application.Storage.setValue("error", data.get("error"));
             }
-            System.println("About to exit onReceive with null");
-            Background.exit(null);
+            Background.exit(distanceWandered);
         } else if (responseCode == -400) {
             System.println("Returning zero distance after -400 return code");
             Background.exit(0);
