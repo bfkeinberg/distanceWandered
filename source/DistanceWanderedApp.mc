@@ -32,10 +32,10 @@ class DistanceWanderedApp extends Application.AppBase {
             System.println("State: " + state.toString());
         }
         if (System.getSystemStats().totalMemory < 32000) {
-            System.println(
+/*             System.println(
                 Lang.format("onStart in background at $1$:$2$:$3$", 
                     [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
-        } else {
+ */        } else {
             var previousDistance = Application.Storage.getValue("distance");
             if (previousDistance != null) {
                 if (previousDistance instanceof Lang.Float || previousDistance instanceof Lang.Number) {
@@ -56,12 +56,12 @@ class DistanceWanderedApp extends Application.AppBase {
                 }
             }
             else {
-                System.println(
+/*                 System.println(
                     Lang.format("No previous distance, initializing miles wandered from onStart at $4$/$5$/$6$ $1$:$2$:$3$",
                         [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d"),
                         nowInfo.month, nowInfo.day, nowInfo.year
                         ]));
-                milesWandered = 0;
+ */                milesWandered = 0;
             }
 
             Application.Storage.clearValues();
@@ -72,10 +72,10 @@ class DistanceWanderedApp extends Application.AppBase {
     function onStop(state as Dictionary?) as Void {
         var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
     	if(!inBackground) {
-            System.println(
+/*             System.println(
                 Lang.format("onStop from foreground at $1$:$2$:$3$", 
                     [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
-            // persist here as well, if an activity is running, but we may need to remove this if it persists into future runs
+ */            // persist here as well, if an activity is running, but we may need to remove this if it persists into future runs
             var actInfo = Activity.getActivityInfo();
             if (actInfo != null && actInfo.timerState != Activity.TIMER_STATE_OFF) {
                 System.println("Activity running during onStop so preserving distance of " + milesWandered);
@@ -90,18 +90,18 @@ class DistanceWanderedApp extends Application.AppBase {
     }
 
     function getServiceDelegate(){
-        var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
-            System.println(
-                Lang.format("getting service delegate at $1$:$2$:$3$", 
-                    [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
-    	//only called in the background	
+/*         var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+        System.println(
+            Lang.format("getting service delegate at $1$:$2$:$3$", 
+                [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
+ */    	//only called in the background	
     	inBackground = true;
         return [new DistanceWandered_ServiceDelgate()];
     }
 
     function onBackgroundData(data_raw as Application.PersistableType) {
         var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
-        if (!(data_raw instanceof Lang.Float)) {
+        if (!(data_raw instanceof Lang.Float) && !(data_raw instanceof Lang.Number)) {
             var warningMsg = Lang.format("Invalid distance $1$ returned", [data_raw]);
             var fullWarningMsg = Lang.format(
                 "$7$ at $4$/$5$/$6$ $1$:$2$:$3$", 
