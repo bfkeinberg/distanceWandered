@@ -70,7 +70,7 @@ class DistanceWanderedApp extends Application.AppBase {
 
     // onStop() is called when your application is exiting
     function onStop(state as Dictionary?) as Void {
-        var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+        // var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
     	if(!inBackground) {
 /*             System.println(
                 Lang.format("onStop from foreground at $1$:$2$:$3$", 
@@ -83,10 +83,10 @@ class DistanceWanderedApp extends Application.AppBase {
             }
     		Background.deleteTemporalEvent();
     	} else {
-            System.println(
+/*             System.println(
                 Lang.format("onStop from background at $1$:$2$:$3$", 
                     [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
-        }
+ */        }
     }
 
     function getServiceDelegate(){
@@ -135,10 +135,10 @@ class DistanceWanderedApp extends Application.AppBase {
 
     // Return the initial view of your application here
     function getInitialView() as [Views] or [Views, InputDelegates] {
-        var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
-        System.println(
-            Lang.format("Getting initial view at $1$:$2$:$3$", 
-                [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
+        // var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+        // System.println(
+        //     Lang.format("Getting initial view at $1$:$2$:$3$", 
+        //         [nowInfo.hour, nowInfo.min.format("%02d"), nowInfo.sec.format("%02d")]));
         return [ new $.DistanceWanderedView(), new $.TouchDelegate() ];
     }
 
