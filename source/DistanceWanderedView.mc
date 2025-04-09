@@ -115,13 +115,13 @@ class DistanceWanderedView extends WatchUi.DataField {
 
     function addPosition(position as coords) {
         var whichBucket = Application.Storage.getValue("bucketNum");
-        var positions = Application.Storage.getValue("bucket_" + whichBucket) as positionChunk;
+        var positions = Application.Storage.getValue("bucket_" + whichBucket) as positionChunk?;
         if (positions == null) {
             // if we've tapped on the field before flipping buckets at least once
             positions = new positionChunk[0];
         }
         else if (positions.size() > maxChunkSize) {
-            positions = Application.Storage.getValue("bucket_" + whichBucket) ;
+            positions = Application.Storage.getValue("bucket_" + whichBucket);
             var lastTrigger = Background.getTemporalEventRegisteredTime();
             var pendingEvent = (lastTrigger != null) && (Time.now().compare(lastTrigger) <= 0);
             // flip buckets?
